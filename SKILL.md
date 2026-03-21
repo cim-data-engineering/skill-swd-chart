@@ -62,29 +62,18 @@ infer the possible stories it could tell. Then present options to the user for c
 
 ## 2. Choose the Right Chart
 
-Select the chart type based on the confirmed story and the shape of the data:
+**Horizontal bar charts are the strong default.** When in doubt, always reach for a horizontal bar chart first — it is the most versatile, readable, and accessible chart type. Only use a different type when horizontal bars genuinely cannot tell the story (e.g., continuous time series → line chart).
+
+Quick reference for common cases:
 
 | Data situation | Best chart type |
 |---|---|
-| One or two numbers | **Simple text** — skip the chart entirely, just display the number prominently |
-| Comparing categories | **Horizontal bar chart** (preferred) or vertical bar chart |
-| Trend over time (continuous) | **Line chart** — never use bars for time series |
-| Two time periods, multiple categories | **Horizontal bar chart** (grouped, with before/after pairs) or **line chart** with 2 points |
-| Parts of a whole | **100% stacked horizontal bar** or simple bar with total shown (never pie/donut) |
-| Starting value → additions → deductions → end | **Waterfall chart** |
-| Tabular data with magnitude patterns | **Heatmap** (table + color saturation) |
-| Vastly different magnitudes | **Square area chart** |
-| Two different variables over time | **Merged line chart** — vertically stacked mini-charts sharing an x-axis (never dual-axis) |
+| Comparing categories | **Horizontal bar chart** (preferred) or vertical bar for time-ordered categories |
+| Trend over time (continuous) | **Line chart** |
+| Parts of a whole | **100% stacked horizontal bar** |
+| Two different variables over time | **Merged line chart** (vertically stacked, shared x-axis) |
 
-**Hard rules on chart selection:**
-- **Horizontal bar charts are the strong default.** When in doubt about chart type, always reach for a horizontal bar chart first. It is the most versatile, readable, and accessible chart for the vast majority of data. Only use a different chart type when horizontal bars genuinely cannot tell the story (e.g., continuous time series → line chart).
-- **Never use pie charts or donut charts.** Replace with horizontal bar or 100% stacked bar.
-- **Never use slopegraphs.** For two-time-period comparisons, use grouped horizontal bars (before/after pairs) or a horizontal bar showing the change/difference. A simple line chart with 2 points is acceptable but horizontal bars are preferred.
-- **Never use 3D.** It distorts perception and adds zero information.
-- **Never use dual-axis charts.** They encourage misleading comparisons between unrelated scales. Instead, use a **merged line chart** (two or more vertically stacked mini-charts sharing an x-axis) to compare patterns of change, or an **index chart** (rebase both to % change from a common starting point) if direct pattern comparison is the main goal.
-- Line charts imply continuity — only use them for continuous data (usually time). For categorical comparisons, always use horizontal bars.
-- When categories have long names, horizontal bars are the only good option — labels read naturally left-to-right.
-- Even for short category names, prefer horizontal bars over vertical bars unless the data is time-ordered (months, quarters, years).
+For the full decision tree (including waterfall, heatmap, simple text, and edge cases), see `references/core-config.md` §4. For chart-type prohibitions (no pie, no dual-axis, no 3D, no slopegraph), see `references/core-config.md` §6.
 
 ---
 
