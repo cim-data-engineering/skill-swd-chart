@@ -365,7 +365,7 @@ measures have different units.
   <div style="font-size:10px; color:#9CA3AF; margin-top:8px;">Data source: [source]</div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
   // For each mini-chart cell: create a tiny horizontal bar chart
   // Each measure column shares a common max scale (computed across all groups for that measure)
@@ -477,7 +477,7 @@ misled by unrelated scales.
   <div style="font-size:10px; color:#9CA3AF; margin-top:8px;">Data source: [source]</div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
   const SWD = { blue: '#2563EB', orange: '#D97706', dark: '#4B5563', mid: '#9CA3AF', faint: '#E5E7EB' };
   const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -855,7 +855,7 @@ Every chart rendered via show_widget should use this structure:
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
   // Chart.js code here using SWD config patterns
 </script>

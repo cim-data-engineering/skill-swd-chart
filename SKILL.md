@@ -1,5 +1,5 @@
 ---
-name: swd-charts
+name: swd-chart
 description: >
   Creates interactive data visualizations following Storytelling with Data (Cole Nussbaumer Knaflic) best practices.
   Produces Chart.js and D3 charts via the Visualizer tool with rigorous decluttering, strategic color,
@@ -19,7 +19,7 @@ This skill produces interactive charts via the **Visualizer tool** (show_widget)
 principles from *Storytelling with Data* by Cole Nussbaumer Knaflic. Every chart must feel
 intentional, decluttered, and focused — as if a professional data storyteller designed it.
 
-Before creating any chart, read `references/chart-patterns.md` for the specific Chart.js/D3
+Before creating any chart, read `references/design-system.md` for the specific Chart.js/D3
 code patterns, color tokens, and per-chart-type implementation guidance.
 
 ---
@@ -85,14 +85,12 @@ Apply these six steps to every chart (from Chapter 3):
 
 ## 3. Color Strategy
 
-The palette is **grey base + strategic accent color**:
+The palette is **grey base + strategic accent color**. See `references/design-system.md` §1 for exact hex tokens and extended shades.
 
-- **Base**: All non-emphasized elements in grey (`#9B9B9B` for text/labels, `#D4D4D4` for muted data, `#E8E8E8` for very light backgrounds)
-- **Positive / Standout accent**: Blue `#2563EB` — used to draw attention to the key data
-- **Negative / Warning accent**: Orange/Amber `#D97706` — used when highlighting problems, declines, or negative values
-- **Graph title**: Dark grey `#4A4A4A` (not pure black — preserves black for extreme emphasis)
-- **Axis labels and ticks**: Medium grey `#9B9B9B`
-- **Gridlines** (if kept): Very light `#ECECEC`, thin (1px)
+- **Base**: All non-emphasized elements in grey (muted text, de-emphasized data, faint gridlines)
+- **Positive / Standout accent**: Blue — draws attention to the key data
+- **Negative / Warning accent**: Orange/Amber — highlights problems, declines, or negative values
+- **Titles**: Dark grey (not pure black — preserves black for extreme emphasis)
 
 **Color rules from SWD:**
 - Use color **sparingly** — design in grey first, then add a single accent color only where you want the audience to look
@@ -147,77 +145,22 @@ Establish a clear reading order through size, color, and position:
 
 ---
 
-## 7. Specific Chart-Type Guidance
+## 7. Chart-Type Quick Reference
 
-### Bar Charts (the default chart type)
-- **Always use a zero baseline.** Non-zero baselines on bar charts are misleading and destroy credibility.
-- **Default to horizontal bars.** Horizontal bars are the best chart for most data — labels read naturally, the audience encounters category names before the data (left-to-right reading), and they handle long labels gracefully. Only use vertical bars when the x-axis represents time (months, quarters, years) and there are many time periods.
-- Order bars intentionally: by value (largest to smallest) unless there's a natural category order (e.g., age groups).
-- For stacked bars, only the bottom series (touching the baseline) allows easy comparison. Keep the most important series there.
-- For two-time-period comparisons (where someone might think of a slopegraph), use a **grouped horizontal bar** with before/after pairs, or a **horizontal bar showing the change amount** (blue for increase, orange for decrease).
+For full implementation details and code patterns for each chart type, read `references/design-system.md`.
 
-### Merged Bar Charts (from *Practical Charts* by Desbarats)
-A merged bar chart places separate mini-bar-charts side by side (or in a grid), each with its own scale. Use instead of stacked or clustered bars when:
-- **Not all parts are shown** — e.g., "top 3 departments" out of many. Stacked bars misleadingly imply the segments sum to the total; merged bars don't.
-- **Measures have different units** — e.g., dollars, satisfaction ratings, and headcount for each region. Putting these on a shared scale creates nonsensical comparisons. Merged bars give each measure its own scale.
-- **You need cross-group comparison without scale distortion** — each measure column has its own axis, so the audience compares like with like.
-
-Layout rules:
-- One row per group (e.g., region), with mini-bars for each measure aligned in columns
-- Category labels appear once on the left; each column has its own scale and unit label above
-- Order categories by value (largest first) unless a natural order exists
-- Apply the same SWD color rules: accent blue for emphasis, grey for context
-- Keep each mini-chart simple — zero baseline, no gridlines, direct value labels
-
-### Merged Line Charts (the dual-axis alternative)
-Instead of two y-axes on one chart, stack two (or more) mini-line-charts vertically sharing the same x-axis. This lets the audience compare patterns of change (spikes, dips, trends) without being misled by unrelated scales.
-
-Layout rules:
-- Each mini-chart has its own y-axis with its own unit label (e.g., "Revenue ($)", "Satisfaction (1-10)")
-- The shared x-axis (usually time) displays labels only on the bottom chart
-- Upper charts hide x-axis labels but maintain the same scale and alignment
-- Charts share consistent width so x-axis points align vertically for visual pattern comparison
-- Reduce height per chart (e.g., 150–180px each) so 2–3 fit in a reasonable total height
-- Apply standard SWD line chart rules: no data markers, direct endpoint labels, accent color for emphasis
-
-When to use merged lines vs. index charts:
-- **Merged lines**: when the audience needs to see actual values in their original units (dollars, ratings, headcount)
-- **Index charts**: when the main point is comparing relative patterns of change (rebase both to % change from a common starting point)
-
-### Line Charts
-- Use for continuous data only (usually time series).
-- Consistent time intervals on the x-axis — never mix decades with years.
-- Directly label each line at its endpoint (right side) instead of using a legend.
-- Use a thicker line for the primary series and thinner grey lines for context.
-- **No data point circles** — ever. Not on hover, not on endpoints, nowhere. Lines only.
-- Show range/confidence with a light shaded area behind the line if relevant.
-- Distinguish forecast from actual: solid line for actual, dashed/thinner for forecast, with light background shading on the forecast region.
-
-### Multi-Line Charts (3+ series) — the Spaghetti Graph Solution
-The interactive highlight pattern is the default for 3+ series:
-- **Default state**: all lines in light grey, direct endpoint labels in matching grey
-- **Hover on chart**: nearest line dataset highlights (bold accent color + thicker), others fade. Headline updates with that series' story.
-- **Click button**: locks a series. Hover is ignored while locked. Click again to unlock.
-- Buttons render as small pills above the chart. Active button gets accent-tinted background.
-- Accent color: blue for positive/growing trends, orange for declining trends.
-- When cursor leaves chart area and nothing is locked, reset to neutral grey state.
-- For 2 lines only, skip interactivity — just color one blue and one grey.
-- For >6 lines, use small multiples (one mini-chart per series) instead.
-
-### Scatterplots
-- Label axes clearly — both dimensions need titles.
-- Use reference lines (like averages) to create quadrants that aid interpretation.
-- Highlight above/below-average points with accent color.
-
-### Heatmaps
-- Always include a color legend showing the low-to-high scale.
-- Use a single hue with varying saturation (not a rainbow).
-- Keep the numeric values visible inside cells.
-
-### Waterfall Charts
-- Color-code: grey for start/end totals, blue for increases, orange for decreases.
-- Show connector lines between segments.
-- Label each segment with its value.
+| Chart type | Key rules |
+|---|---|
+| **Bar (horizontal/vertical)** | Zero baseline always; horizontal default; order by value unless natural order exists |
+| **Merged bar** | Separate mini-charts with own scales; use when not all parts shown or units differ |
+| **Merged line** | Vertically stacked mini-lines sharing x-axis; replaces dual-axis charts |
+| **Line** | Continuous data only; no data point circles ever; direct endpoint labels |
+| **Multi-line (3+)** | Interactive highlight pattern: all grey default, hover/click to accent one series |
+| **Stacked bar** | Most important series on baseline; use 100% stacked for part-to-whole |
+| **Scatterplot** | Both axes titled; add reference lines for quadrants; highlight outliers |
+| **Heatmap** | Single hue varying saturation; numeric values in cells; include color legend |
+| **Waterfall** | Grey totals, blue increases, orange decreases; connector lines between segments |
+| **Bullet** | Grey background range, thin target marker, colored actual bar |
 
 ---
 
@@ -227,7 +170,7 @@ All charts are rendered via the **Visualizer tool** (`show_widget`). Before your
 call `read_me` with the appropriate module (`chart`, `interactive`, or `diagram`).
 
 For detailed code patterns, Chart.js configuration, and D3 templates for each chart type,
-read `references/chart-patterns.md`.
+read `references/design-system.md`.
 
 **Key technical rules:**
 - Use Chart.js for standard charts (bar, line, scatter, stacked bar, 100% stacked)
@@ -237,3 +180,26 @@ read `references/chart-patterns.md`.
 - Set `responsive: true` and use a reasonable aspect ratio
 - Disable Chart.js default legend — implement direct labeling instead
 - Disable Chart.js default tooltip styling — use a clean, minimal custom tooltip if interactivity adds value
+
+---
+
+## 9. Post-Render Checklist
+
+After rendering every chart, verify these SWD essentials before presenting:
+
+- [ ] Zero baseline on all bar charts
+- [ ] Legend removed — data labeled directly
+- [ ] Accent color used on 1-2 elements max; everything else is grey
+- [ ] All text is horizontal (no diagonal/rotated labels)
+- [ ] Title present, top-left, largest text on the chart
+- [ ] No data point circles on line charts
+
+---
+
+## 10. Edge Cases
+
+- **Insufficient or ambiguous data**: Ask the user to clarify before charting. Do not guess or fabricate data points.
+- **Too many categories (>15)**: Show the top N with a note about omitted categories, or use small multiples.
+- **Too many time periods for labels to fit**: Abbreviate labels (Q1, Q2…) or show every Nth label. Never rotate text diagonally.
+- **Mixed units in a single request**: Use a merged bar or merged line chart — never combine different units on a shared axis.
+- **Visualizer tool unavailable**: Describe the chart you would build (type, data mapping, color strategy) so the user can recreate it.
