@@ -8,7 +8,7 @@ description: >
   plot, or visualize data — including requests like "show me a chart of…", "plot this data",
   "visualize these numbers", "make a bar/line/chart", "graph this", or any mention of
   bar charts, line charts, scatterplots, heatmaps, waterfall charts, stacked bars,
-  or bullet charts. Also triggers when the user provides data (CSV, table, numbers) and asks
+  merged charts, bullet charts, or dual-axis alternatives. Also triggers when the user provides data (CSV, table, numbers) and asks
   Claude to "show" or "display" it visually, or when they ask for a dashboard or data summary visual.
   Even casual requests like "can you chart this?" or "what does this data look like?" should trigger this skill.
 ---
@@ -47,13 +47,17 @@ Auto-select the chart type based on what the data is and what story it tells:
 | Tabular data with magnitude patterns | **Heatmap** (table + color saturation) |
 | Actual vs. target with qualitative ranges | **Bullet chart** |
 | Vastly different magnitudes | **Square area chart** |
+| Subset of categories (not all parts shown) | **Merged bar chart** — separate mini-charts avoid implying segments sum to the total |
+| Multiple measures with different units (dollars, ratings, counts) | **Merged bar chart** — each measure gets its own scale, preventing nonsensical comparisons |
+| Two different variables over time | **Merged line chart** — vertically stacked mini-charts sharing an x-axis (never dual-axis) |
 
 **Hard rules on chart selection:**
 - **Horizontal bar charts are the strong default.** When in doubt about chart type, always reach for a horizontal bar chart first. It is the most versatile, readable, and accessible chart for the vast majority of data. Only use a different chart type when horizontal bars genuinely cannot tell the story (e.g., continuous time series → line chart, two-variable relationship → scatterplot).
 - **Never use pie charts or donut charts.** Replace with horizontal bar or 100% stacked bar.
 - **Never use slopegraphs.** For two-time-period comparisons, use grouped horizontal bars (before/after pairs) or a horizontal bar showing the change/difference. A simple line chart with 2 points is acceptable but horizontal bars are preferred.
 - **Never use 3D.** It distorts perception and adds zero information.
-- **Avoid secondary y-axes.** Instead, either label data directly or split into two vertically stacked charts sharing an x-axis.
+- **Never use dual-axis charts.** They encourage misleading comparisons between unrelated scales. Instead, use a **merged line chart** (two or more vertically stacked mini-charts sharing an x-axis) to compare patterns of change, or an **index chart** (rebase both to % change from a common starting point) if direct pattern comparison is the main goal.
+- **Prefer merged bar charts over stacked/clustered bars when not all parts are shown.** Stacked bars and pie charts imply the segments add up to the total — if you're only showing a subset of categories (e.g., "top 3 departments" out of many), use merged bars instead, which don't carry that false implication.
 - Line charts imply continuity — only use them for continuous data (usually time). For categorical comparisons, always use horizontal bars.
 - When categories have long names, horizontal bars are the only good option — labels read naturally left-to-right.
 - Even for short category names, prefer horizontal bars over vertical bars unless the data is time-ordered (months, quarters, years).
@@ -152,6 +156,34 @@ Establish a clear reading order through size, color, and position:
 - For stacked bars, only the bottom series (touching the baseline) allows easy comparison. Keep the most important series there.
 - For two-time-period comparisons (where someone might think of a slopegraph), use a **grouped horizontal bar** with before/after pairs, or a **horizontal bar showing the change amount** (blue for increase, orange for decrease).
 
+### Merged Bar Charts (from *Practical Charts* by Desbarats)
+A merged bar chart places separate mini-bar-charts side by side (or in a grid), each with its own scale. Use instead of stacked or clustered bars when:
+- **Not all parts are shown** — e.g., "top 3 departments" out of many. Stacked bars misleadingly imply the segments sum to the total; merged bars don't.
+- **Measures have different units** — e.g., dollars, satisfaction ratings, and headcount for each region. Putting these on a shared scale creates nonsensical comparisons. Merged bars give each measure its own scale.
+- **You need cross-group comparison without scale distortion** — each measure column has its own axis, so the audience compares like with like.
+
+Layout rules:
+- One row per group (e.g., region), with mini-bars for each measure aligned in columns
+- Category labels appear once on the left; each column has its own scale and unit label above
+- Order categories by value (largest first) unless a natural order exists
+- Apply the same SWD color rules: accent blue for emphasis, grey for context
+- Keep each mini-chart simple — zero baseline, no gridlines, direct value labels
+
+### Merged Line Charts (the dual-axis alternative)
+Instead of two y-axes on one chart, stack two (or more) mini-line-charts vertically sharing the same x-axis. This lets the audience compare patterns of change (spikes, dips, trends) without being misled by unrelated scales.
+
+Layout rules:
+- Each mini-chart has its own y-axis with its own unit label (e.g., "Revenue ($)", "Satisfaction (1-10)")
+- The shared x-axis (usually time) displays labels only on the bottom chart
+- Upper charts hide x-axis labels but maintain the same scale and alignment
+- Charts share consistent width so x-axis points align vertically for visual pattern comparison
+- Reduce height per chart (e.g., 150–180px each) so 2–3 fit in a reasonable total height
+- Apply standard SWD line chart rules: no data markers, direct endpoint labels, accent color for emphasis
+
+When to use merged lines vs. index charts:
+- **Merged lines**: when the audience needs to see actual values in their original units (dollars, ratings, headcount)
+- **Index charts**: when the main point is comparing relative patterns of change (rebase both to % change from a common starting point)
+
 ### Line Charts
 - Use for continuous data only (usually time series).
 - Consistent time intervals on the x-axis — never mix decades with years.
@@ -199,6 +231,7 @@ read `references/chart-patterns.md`.
 
 **Key technical rules:**
 - Use Chart.js for standard charts (bar, line, scatter, stacked bar, 100% stacked)
+- Use multiple Chart.js instances in a CSS grid/flex layout for merged charts (each mini-chart gets its own canvas and scale)
 - Use D3 or custom SVG for waterfall charts, bullet charts, and heatmaps
 - Always use CSS variables for theming so charts adapt to light/dark mode
 - Set `responsive: true` and use a reasonable aspect ratio

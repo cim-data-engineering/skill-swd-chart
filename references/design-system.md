@@ -11,14 +11,16 @@ via the Visualizer tool. Read this before creating any chart.
 5. [Chart Type: Horizontal Bar](#horizontal-bar)
 6. [Chart Type: Vertical Bar (Column)](#vertical-bar)
 7. [Chart Type: Stacked Bar](#stacked-bar)
-8. [Chart Type: Waterfall](#waterfall)
-9. [Chart Type: Line Chart](#line-chart)
-10. [Two-Period Comparison (replaces Slopegraph)](#two-period-comparison)
-11. [Chart Type: Scatterplot](#scatterplot)
-12. [Chart Type: Heatmap](#heatmap)
-13. [Chart Type: Bullet Chart](#bullet-chart)
-14. [Annotation Patterns](#annotations)
-15. [Anti-Patterns to Avoid](#anti-patterns)
+8. [Chart Type: Merged Bar Chart](#merged-bar)
+9. [Chart Type: Merged Line Chart](#merged-line)
+10. [Chart Type: Waterfall](#waterfall)
+11. [Chart Type: Line Chart](#line-chart)
+12. [Two-Period Comparison (replaces Slopegraph)](#two-period-comparison)
+13. [Chart Type: Scatterplot](#scatterplot)
+14. [Chart Type: Heatmap](#heatmap)
+15. [Chart Type: Bullet Chart](#bullet-chart)
+16. [Annotation Patterns](#annotations)
+17. [Anti-Patterns to Avoid](#anti-patterns)
 
 ---
 
@@ -175,6 +177,14 @@ Ask yourself these questions about the data:
 Q: How many numbers are we showing?
 ├─ Just 1-2 numbers → Use SIMPLE TEXT (big number + context sentence), not a chart
 │
+Q: Are there multiple measures with DIFFERENT UNITS (dollars, ratings, counts)?
+├─ Yes, categorical data → MERGED BAR CHART (each measure on its own scale)
+├─ Yes, over time → MERGED LINE CHART (stacked vertically, shared x-axis)
+│  └─ If comparing relative patterns of change is the main point → consider INDEX CHART
+│
+Q: Showing breakdown of totals but NOT ALL PARTS are included?
+├─ Yes → MERGED BAR CHART (avoids implying segments sum to the total)
+│
 Q: Is the data categorical or continuous?
 ├─ Continuous (time series, sequential) → LINE CHART
 │  ├─ Single metric over time → single line
@@ -310,7 +320,243 @@ datasets: [
 
 ---
 
-## 8. Waterfall Chart <a name="waterfall"></a>
+## 8. Merged Bar Chart <a name="merged-bar"></a>
+
+Separate mini-bar-charts arranged in a grid, each with its own scale. From *Practical Charts*
+(Desbarats) — use instead of stacked/clustered bars when not all parts are shown or when
+measures have different units.
+
+**When to use:**
+- Showing a **subset** of parts (e.g., "top 3 departments" out of many) — stacked bars misleadingly imply segments sum to the total
+- Showing **different units of measurement** for the same groups (e.g., revenue in $, satisfaction rating 1-10, headcount) — a shared scale creates nonsensical comparisons
+- Comparing specific parts **across different totals** when precise comparison matters more than seeing the total
+
+**Implementation — multiple Chart.js canvases in a CSS grid:**
+
+```html
+<div style="font-family: system-ui, -apple-system, sans-serif; padding: 16px; max-width: 700px;">
+
+  <!-- Title -->
+  <div style="font-size:14px; font-weight:700; color:#4B5563; margin-bottom:2px;">
+    [Insight headline]
+  </div>
+  <div style="font-size:13px; color:#9CA3AF; margin-bottom:12px;">
+    [Descriptive subtitle]
+  </div>
+
+  <!-- Grid of mini-charts: one column per measure -->
+  <div style="display:grid; grid-template-columns:120px repeat(N, 1fr); gap:4px 12px; align-items:center;">
+
+    <!-- Header row: empty cell for labels, then measure names -->
+    <div></div>
+    <div style="font-size:11px; font-weight:600; color:#9CA3AF; text-align:center;">Measure A ($)</div>
+    <div style="font-size:11px; font-weight:600; color:#9CA3AF; text-align:center;">Measure B (rating)</div>
+    <!-- ...one per measure -->
+
+    <!-- Data rows: one per group/category -->
+    <!-- Row 1 -->
+    <div style="font-size:12px; color:#4B5563; text-align:right; padding-right:8px;">Category 1</div>
+    <div style="position:relative; height:32px;"><canvas id="chart-0-0"></canvas></div>
+    <div style="position:relative; height:32px;"><canvas id="chart-0-1"></canvas></div>
+
+    <!-- Row 2, Row 3, etc. -->
+  </div>
+
+  <div style="font-size:10px; color:#9CA3AF; margin-top:8px;">Data source: [source]</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  // For each mini-chart cell: create a tiny horizontal bar chart
+  // Each measure column shares a common max scale (computed across all groups for that measure)
+  // This ensures bars within each column are comparable
+
+  const SWD = { blue: '#2563EB', light: '#D1D5DB', dark: '#4B5563', mid: '#9CA3AF', faint: '#E5E7EB' };
+
+  function createMiniBar(canvasId, value, maxVal, color) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'bar',
+      data: {
+        labels: [''],
+        datasets: [{ data: [value], backgroundColor: color, barPercentage: 0.7, categoryPercentage: 1.0 }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { display: false, min: 0, max: maxVal },
+          y: { display: false }
+        },
+        // Add value label via plugin
+        animation: { duration: 0 }
+      },
+      plugins: [{
+        afterDraw(chart) {
+          const ctx = chart.ctx;
+          const meta = chart.getDatasetMeta(0).data[0];
+          ctx.fillStyle = SWD.dark;
+          ctx.font = '600 11px system-ui';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(value.toLocaleString(), meta.x + 4, meta.y);
+        }
+      }]
+    });
+  }
+
+  // Example usage:
+  // const measures = [{name:'Revenue ($K)', values:[120, 95, 140], max:140},
+  //                   {name:'Satisfaction', values:[8.2, 7.5, 9.1], max:10}];
+  // const groups = ['East', 'Central', 'West'];
+  // groups.forEach((g, gi) => {
+  //   measures.forEach((m, mi) => {
+  //     createMiniBar(`chart-${gi}-${mi}`, m.values[gi], m.max, SWD.blue);
+  //   });
+  // });
+</script>
+```
+
+**Rules:**
+- Each measure column must have its own scale (computed from the max value in that column)
+- Category labels appear once on the left — never repeat them
+- Add a measure title (with unit) above each column
+- Zero baseline on every mini-bar (enforced by `min: 0`)
+- Value labels appear at the end of each bar for precision
+- Use ACCENT_BLUE for all bars, or highlight specific groups with ACCENT_BLUE and push others to BASE_LIGHT
+- For 2 measures: two columns. For 3+: consider whether the grid becomes too wide; if so, stack measure groups vertically instead
+
+---
+
+## 9. Merged Line Chart (dual-axis alternative) <a name="merged-line"></a>
+
+Instead of dual-axis charts, stack two or more mini-line-charts vertically sharing the same
+x-axis. The audience can compare patterns of change (spikes, dips, trends) without being
+misled by unrelated scales.
+
+**When to use:**
+- Comparing two variables with **different units** over time (e.g., revenue in $ and customer satisfaction 1-10)
+- Any situation where a dual-axis chart is tempting — use this instead
+- When the audience needs to see actual values (not just relative change — for relative change, consider index charts)
+
+**Implementation — vertically stacked Chart.js canvases:**
+
+```html
+<div style="font-family: system-ui, -apple-system, sans-serif; padding: 16px; max-width: 700px;">
+
+  <!-- Title -->
+  <div style="font-size:14px; font-weight:700; color:#4B5563; margin-bottom:2px;">
+    [Insight headline]
+  </div>
+  <div style="font-size:13px; color:#9CA3AF; margin-bottom:12px;">
+    [Descriptive subtitle]
+  </div>
+
+  <!-- Stacked mini-line-charts -->
+  <div style="display:flex; flex-direction:column; gap:4px;">
+
+    <!-- Upper chart: hides x-axis labels -->
+    <div>
+      <div style="font-size:11px; font-weight:600; color:#9CA3AF; margin-bottom:2px;">Revenue ($K)</div>
+      <div style="position:relative; height:160px;">
+        <canvas id="line-top"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom chart: shows x-axis labels -->
+    <div>
+      <div style="font-size:11px; font-weight:600; color:#9CA3AF; margin-bottom:2px;">Satisfaction (1-10)</div>
+      <div style="position:relative; height:160px;">
+        <canvas id="line-bottom"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="font-size:10px; color:#9CA3AF; margin-top:8px;">Data source: [source]</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  const SWD = { blue: '#2563EB', orange: '#D97706', dark: '#4B5563', mid: '#9CA3AF', faint: '#E5E7EB' };
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+  function createMergedLine(canvasId, data, color, yLabel, showXAxis) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          borderColor: color,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          pointHitRadius: 14,
+          tension: 0,
+          fill: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: {
+          x: {
+            border: { display: false },
+            grid: { display: false },
+            ticks: {
+              display: showXAxis,   // Only bottom chart shows x-axis labels
+              color: SWD.mid,
+              font: { size: 11 },
+            },
+          },
+          y: {
+            border: { display: false },
+            grid: { display: true, color: SWD.faint, lineWidth: 0.5 },
+            ticks: { color: SWD.mid, font: { size: 11 }, padding: 8 },
+          },
+        },
+        layout: { padding: { top: 4, right: 16, bottom: 0, left: 8 } },
+        elements: { point: { radius: 0, hoverRadius: 0 } },
+      },
+      // Direct endpoint label plugin
+      plugins: [{
+        afterDraw(chart) {
+          const ds = chart.getDatasetMeta(0).data;
+          const last = ds[ds.length - 1];
+          const ctx = chart.ctx;
+          ctx.fillStyle = color;
+          ctx.font = '600 11px system-ui';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(chart.data.datasets[0].data[ds.length - 1].toLocaleString(), last.x + 6, last.y);
+        }
+      }]
+    });
+  }
+
+  // Top chart (upper variable) — hide x-axis
+  // createMergedLine('line-top', [120, 135, 110, 150, 142, 165], SWD.blue, 'Revenue ($K)', false);
+  // Bottom chart (lower variable) — show x-axis
+  // createMergedLine('line-bottom', [7.2, 7.5, 6.8, 8.0, 7.9, 8.3], SWD.orange, 'Satisfaction', true);
+</script>
+```
+
+**Rules:**
+- Each mini-chart has its own y-axis with its own unit — never share a y-axis between different units
+- The shared x-axis (time) displays labels only on the **bottom** chart; upper charts hide them
+- Charts must share consistent width so x-axis points align vertically — this is what allows pattern comparison
+- Use 150–180px height per mini-chart so 2–3 fit comfortably
+- Apply all standard SWD line rules: no data markers, direct endpoint labels, accent color for emphasis
+- Use different accent colors (blue for one variable, orange for the other) to distinguish the two series
+- Add a unit label above each mini-chart (e.g., "Revenue ($K)", "Satisfaction (1-10)")
+- For 3+ variables: stack three mini-charts; beyond that, consider whether the audience really needs all variables together
+
+---
+
+## 10. Waterfall Chart <a name="waterfall"></a>
 
 Shows a starting value, increases, decreases, and resulting end value. Build with D3 or
 custom Chart.js (floating bars).
@@ -337,7 +583,7 @@ datasets: [{
 
 ---
 
-## 9. Line Chart <a name="line-chart"></a>
+## 11. Line Chart <a name="line-chart"></a>
 
 The default for time-series data.
 
@@ -453,7 +699,7 @@ same x-axis and y-scale) rather than the interactive approach.
 
 ---
 
-## 10. Slopegraph — DEPRECATED <a name="slopegraph"></a>
+## 12. Slopegraph — DEPRECATED <a name="slopegraph"></a>
 
 **Do not use slopegraphs.** For comparing two time points or two conditions across multiple categories, use one of these instead:
 
@@ -463,7 +709,7 @@ same x-axis and y-scale) rather than the interactive approach.
 
 ---
 
-## 11. Scatterplot <a name="scatterplot"></a>
+## 13. Scatterplot <a name="scatterplot"></a>
 
 Shows relationship between two continuous variables.
 
@@ -486,7 +732,7 @@ datasets: [{
 
 ---
 
-## 12. Heatmap <a name="heatmap"></a>
+## 14. Heatmap <a name="heatmap"></a>
 
 A table with color saturation encoding relative magnitude. Build with HTML/CSS in the Visualizer.
 
@@ -509,7 +755,7 @@ const ratio = (val - minVal) / (maxVal - minVal);
 
 ---
 
-## 13. Bullet Chart <a name="bullet-chart"></a>
+## 15. Bullet Chart <a name="bullet-chart"></a>
 
 Shows actual performance against a target. Build with D3/SVG.
 
@@ -521,7 +767,7 @@ Shows actual performance against a target. Build with D3/SVG.
 
 ---
 
-## 14. Annotation Patterns <a name="annotations"></a>
+## 16. Annotation Patterns <a name="annotations"></a>
 
 ### When to annotate
 - There is a clear, specific insight (a spike, a crossover, a gap, an inflection point)
@@ -555,7 +801,7 @@ Shows actual performance against a target. Build with D3/SVG.
 
 ---
 
-## 15. Anti-Patterns to Avoid <a name="anti-patterns"></a>
+## 17. Anti-Patterns to Avoid <a name="anti-patterns"></a>
 
 These are violations of SWD principles. Never do these:
 
@@ -569,7 +815,7 @@ These are violations of SWD principles. Never do these:
 | Heavy gridlines | Compete with data for attention | Remove or make very faint |
 | Data markers on every point | Adds cognitive load without insight | Remove, or use only on key points |
 | Diagonal / rotated text | 52% slower to read than horizontal | Abbreviate labels or switch to horizontal bar |
-| Secondary y-axis | Confusing — hard to know which data maps to which axis | Label directly or split into two aligned charts |
+| Dual-axis chart / Secondary y-axis | Confusing — audiences misread which scale applies; encourages nonsensical comparisons between unrelated units | Use merged line charts (stacked vertically, shared x-axis) or index charts (rebase to % change) |
 | Non-zero baseline on bars | Visually exaggerates differences, misleading | Always start bar charts at zero |
 | Trailing decimals (50.00) | Look more complicated than necessary | Write 50 |
 | Excessive data labels | Creates clutter | Label only the points that matter |
