@@ -15,10 +15,9 @@ via the Visualizer tool. Read this before creating any chart.
 9. [Chart Type: Waterfall](#waterfall)
 10. [Chart Type: Line Chart](#line-chart)
 11. [Two-Period Comparison (replaces Slopegraph)](#two-period-comparison)
-12. [Chart Type: Scatterplot](#scatterplot)
-13. [Chart Type: Heatmap](#heatmap)
-14. [Annotation Patterns](#annotations)
-15. [Anti-Patterns to Avoid](#anti-patterns)
+12. [Chart Type: Heatmap](#heatmap)
+13. [Annotation Patterns](#annotations)
+14. [Anti-Patterns to Avoid](#anti-patterns)
 
 ---
 
@@ -199,8 +198,6 @@ Q: Is the data categorical or continuous?
 │  │  └─ Just a few segments → simple text with percentages
 │  │
 │  └─ Building to a total (start + adds - subtracts = end) → WATERFALL
-│
-├─ Two variables, looking for relationship → SCATTERPLOT
 │
 └─ Table of values where magnitude matters → HEATMAP
 ```
@@ -592,30 +589,7 @@ same x-axis and y-scale) rather than the interactive approach.
 
 ---
 
-## 12. Scatterplot <a name="scatterplot"></a>
-
-Shows relationship between two continuous variables.
-
-```javascript
-type: 'scatter',
-datasets: [{
-  data: points.map(p => ({ x: p.x, y: p.y })),
-  backgroundColor: SWD.colors.blue + '99',  // Semi-transparent
-  borderColor: SWD.colors.blue,
-  borderWidth: 1,
-  pointRadius: 5,
-}]
-```
-
-**Rules:**
-- Both axes need clear titles (what each dimension represents)
-- Add reference lines (averages, thresholds) as thin dashed grey lines
-- Highlight outliers or key points with ACCENT_BLUE/ORANGE and annotations
-- Consider adding quadrant labels when the axes create meaningful regions
-
----
-
-## 13. Heatmap <a name="heatmap"></a>
+## 12. Heatmap <a name="heatmap"></a>
 
 A table with color saturation encoding relative magnitude. Build with HTML/CSS in the Visualizer.
 
@@ -638,7 +612,7 @@ const ratio = (val - minVal) / (maxVal - minVal);
 
 ---
 
-## 14. Annotation Patterns <a name="annotations"></a>
+## 13. Annotation Patterns <a name="annotations"></a>
 
 ### When to annotate
 - There is a clear, specific insight (a spike, a crossover, a gap, an inflection point)
@@ -672,7 +646,7 @@ const ratio = (val - minVal) / (maxVal - minVal);
 
 ---
 
-## 15. Anti-Patterns to Avoid <a name="anti-patterns"></a>
+## 14. Anti-Patterns to Avoid <a name="anti-patterns"></a>
 
 These are violations of SWD principles. Never do these:
 

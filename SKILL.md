@@ -66,14 +66,13 @@ Select the chart type based on the confirmed story and the shape of the data:
 | Trend over time (continuous) | **Line chart** — never use bars for time series |
 | Two time periods, multiple categories | **Horizontal bar chart** (grouped, with before/after pairs) or **line chart** with 2 points |
 | Parts of a whole | **100% stacked horizontal bar** or simple bar with total shown (never pie/donut) |
-| Relationship between two variables | **Scatterplot** |
 | Starting value → additions → deductions → end | **Waterfall chart** |
 | Tabular data with magnitude patterns | **Heatmap** (table + color saturation) |
 | Vastly different magnitudes | **Square area chart** |
 | Two different variables over time | **Merged line chart** — vertically stacked mini-charts sharing an x-axis (never dual-axis) |
 
 **Hard rules on chart selection:**
-- **Horizontal bar charts are the strong default.** When in doubt about chart type, always reach for a horizontal bar chart first. It is the most versatile, readable, and accessible chart for the vast majority of data. Only use a different chart type when horizontal bars genuinely cannot tell the story (e.g., continuous time series → line chart, two-variable relationship → scatterplot).
+- **Horizontal bar charts are the strong default.** When in doubt about chart type, always reach for a horizontal bar chart first. It is the most versatile, readable, and accessible chart for the vast majority of data. Only use a different chart type when horizontal bars genuinely cannot tell the story (e.g., continuous time series → line chart).
 - **Never use pie charts or donut charts.** Replace with horizontal bar or 100% stacked bar.
 - **Never use slopegraphs.** For two-time-period comparisons, use grouped horizontal bars (before/after pairs) or a horizontal bar showing the change/difference. A simple line chart with 2 points is acceptable but horizontal bars are preferred.
 - **Never use 3D.** It distorts perception and adds zero information.
@@ -196,7 +195,6 @@ For full implementation details and code patterns for each chart type, read `ref
 | **Line** | Continuous data only; no data point circles ever; direct endpoint labels |
 | **Multi-line (3+)** | Interactive highlight pattern: all grey default, hover/click to accent one series |
 | **Stacked bar** | Most important series on baseline; use 100% stacked for part-to-whole |
-| **Scatterplot** | Both axes titled; add reference lines for quadrants; highlight outliers |
 | **Heatmap** | Single hue varying saturation; numeric values in cells; include color legend |
 | **Waterfall** | Grey totals, blue increases, orange decreases; connector lines between segments |
 
@@ -211,7 +209,7 @@ For detailed code patterns, Chart.js configuration, and D3 templates for each ch
 read `references/design-system.md`.
 
 **Key technical rules:**
-- Use Chart.js for standard charts (bar, line, scatter, stacked bar, 100% stacked)
+- Use Chart.js for standard charts (bar, line, stacked bar, 100% stacked)
 - Use multiple Chart.js instances in a CSS grid/flex layout for merged line charts (each mini-chart gets its own canvas and scale)
 - Use D3 or custom SVG for waterfall charts and heatmaps
 - Always use CSS variables for theming so charts adapt to light/dark mode
