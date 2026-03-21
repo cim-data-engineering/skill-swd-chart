@@ -15,8 +15,13 @@ This skill produces interactive charts via the **Visualizer tool** (show_widget)
 principles from *Storytelling with Data* by Cole Nussbaumer Knaflic. Every chart must feel
 intentional, decluttered, and focused — as if a professional data storyteller designed it.
 
-Before creating any chart, read `references/design-system.md` for the specific Chart.js/D3
-code patterns, color tokens, and per-chart-type implementation guidance.
+Invoked via `/swd-chart`. Provide your data inline or describe the dataset.
+
+Before creating any chart, read `references/core-config.md` for color tokens, Chart.js base
+config, and the chart selection decision tree. Then read the chart-type-specific reference:
+- `references/bar-charts.md` — when building horizontal, vertical, or stacked bar charts
+- `references/line-charts.md` — when building line charts or merged line charts
+- `references/specialty-charts.md` — when building waterfall charts or heatmaps
 
 ---
 
@@ -124,7 +129,7 @@ Apply these six steps to every chart (from Chapter 3):
 
 ## 5. Color Strategy
 
-The palette is **grey base + strategic accent color**. See `references/design-system.md` §1 for exact hex tokens and extended shades.
+The palette is **grey base + strategic accent color**. See `references/core-config.md` §1 for exact hex tokens and extended shades.
 
 - **Base**: All non-emphasized elements in grey (muted text, de-emphasized data, faint gridlines)
 - **Positive / Standout accent**: Blue — draws attention to the key data
@@ -148,7 +153,7 @@ Use these sparingly to direct the eye:
 - **Color intensity**: The accent color on a grey field instantly draws the eye — this is the primary tool
 - **Size**: Make the most important text/number larger. The chart title should be the largest text element.
 - **Bold weight**: Use for titles, key labels, and the single most important annotation
-- **No data point markers** — lines should be clean without circles. Use line thickness and accent color to signal importance.
+- **Line emphasis**: Use line thickness and accent color to signal importance (data markers are removed per §4)
 - **Numeric labels**: Add ONLY on the specific data points you want the audience to notice (never on every point — that creates clutter)
 - **Position**: Place the most important information at the top-left. Titles and axis labels should be upper-left-most justified.
 
@@ -184,29 +189,13 @@ Establish a clear reading order through size, color, and position:
 
 ---
 
-## 9. Chart-Type Quick Reference
-
-For full implementation details and code patterns for each chart type, read `references/design-system.md`.
-
-| Chart type | Key rules |
-|---|---|
-| **Bar (horizontal/vertical)** | Zero baseline always; horizontal default; order by value unless natural order exists |
-| **Merged line** | Vertically stacked mini-lines sharing x-axis; replaces dual-axis charts |
-| **Line** | Continuous data only; no data point circles ever; direct endpoint labels |
-| **Multi-line (3+)** | Interactive highlight pattern: all grey default, hover/click to accent one series |
-| **Stacked bar** | Most important series on baseline; use 100% stacked for part-to-whole |
-| **Heatmap** | Single hue varying saturation; numeric values in cells; include color legend |
-| **Waterfall** | Grey totals, blue increases, orange decreases; connector lines between segments |
-
----
-
-## 10. Implementation
+## 9. Implementation
 
 All charts are rendered via the **Visualizer tool** (`show_widget`). Before your first chart,
 call `read_me` with the appropriate module (`chart`, `interactive`, or `diagram`).
 
-For detailed code patterns, Chart.js configuration, and D3 templates for each chart type,
-read `references/design-system.md`.
+For detailed code patterns and Chart.js configuration, read the relevant chart-type reference
+file (`references/bar-charts.md`, `references/line-charts.md`, or `references/specialty-charts.md`).
 
 **Key technical rules:**
 - Use Chart.js for standard charts (bar, line, stacked bar, 100% stacked)
@@ -219,7 +208,7 @@ read `references/design-system.md`.
 
 ---
 
-## 11. Post-Render Checklist
+## 10. Post-Render Checklist
 
 After rendering every chart, verify these SWD essentials before presenting:
 
@@ -232,7 +221,7 @@ After rendering every chart, verify these SWD essentials before presenting:
 
 ---
 
-## 12. Edge Cases
+## 11. Edge Cases
 
 - **Insufficient or ambiguous data**: Ask the user to clarify before charting. Do not guess or fabricate data points.
 - **Too many categories**: See §3 Managing Many Categories — never plot more than ~10-12 in a single chart.
