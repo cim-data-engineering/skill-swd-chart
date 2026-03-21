@@ -116,26 +116,151 @@ Apply these six steps to every chart (from Chapter 3):
 
 ---
 
-## 5. Color Strategy
+## 5. Color Strategy — Grey-First, Highlight-Only
 
-The palette is **grey base + strategic accent color**. See `references/core-config.md` §1 for exact hex tokens and extended shades.
+The default state of every chart is **grey**. All bars, lines, labels, and annotations
+start in grey. Color is then applied surgically — only to the data points that ARE the
+story. This is the single most important SWD principle for this skill.
 
-- **Base**: All non-emphasized elements in grey (muted text, de-emphasized data, faint gridlines)
-- **Positive / Standout accent**: Blue — draws attention to the key data
-- **Negative / Warning accent**: Orange/Amber — highlights problems, declines, or negative values
-- **Titles**: Dark grey (not pure black — preserves black for extreme emphasis)
+See `references/core-config.md` §1 for exact hex tokens and extended shades.
 
-**Color rules from SWD:**
-- Use color **sparingly** — design in grey first, then add a single accent color only where you want the audience to look
+### The grey-first rule
+
+- **Default bar color**: `#D1D5DB` (BASE_LIGHT) — every bar starts here
+- **Default label color**: `#9CA3AF` (BASE_MID) — every data label starts here
+- **Default axis label weight**: `400` (normal) — no emphasis by default
+
+Color is earned. A bar only gets an accent color if it is:
+1. The specific outlier or problem the chart is highlighting
+2. Below/above a meaningful threshold that the headline calls out
+3. The answer to the question the user is asking
+
+### What color means
+
+- **Orange `#D97706`**: Something is wrong. A score below threshold, a declining metric,
+  a problem that needs attention. Use for the bars/labels you want the eye drawn to
+  because they represent concern.
+- **Blue `#2563EB`**: Something is notably good or is the primary subject. Use sparingly —
+  only when "good performance" IS the story (e.g., a recovery, a top performer).
+- **Grey `#D1D5DB`**: Everything else. The context. The supporting cast. Grey does not
+  mean "bad" — it means "not the point right now."
+
+### Common mistake to avoid
+
+Do NOT use a three-color scale (orange = bad, blue = good, grey = middle) as a default
+encoding. This turns the chart into a heatmap and dilutes the story. Instead:
+
+- If the story is "one thing is broken" → that thing is orange, everything else is grey
+- If the story is "one thing is great" → that thing is blue, everything else is grey
+- If the story is "compare good vs bad" → only then use both orange and blue, with grey
+  for anything that's neither
+
+### Label color follows bar color
+
+When a bar is highlighted with an accent color, its data label should match:
+- Orange bar → orange label text, weight 700
+- Grey bar → grey label text (`#9CA3AF`), weight 400
+- Same for y-axis category labels: bold + accent color for highlighted rows,
+  normal weight + dark grey for everything else
+
+### General color rules
+
 - Use color **consistently** — if blue means "our company" on one chart, it means that everywhere
 - Never use color for decoration. Every color choice must be intentional.
 - Avoid red-green combinations (colorblind accessibility). Use blue vs. orange instead.
 - Varying **saturation** of one hue works well for ordinal data (e.g., priority levels)
-- When multiple series exist but only one matters, make the important one the accent color and push everything else to grey
 
 ---
 
-## 6. Focus Attention with Preattentive Attributes
+## 6. Progressive Data Storytelling — The Drill-Down Pattern
+
+When data has a natural hierarchy (portfolio → site → equipment type → fault category),
+don't flatten everything into one chart. Instead, build a **progressive reveal** — a
+sequence of charts in a single widget that guides the reader from overview to root cause.
+
+### When to use the drill-down pattern
+
+Use multi-chart drill-downs when:
+- The user asks "why" or "what's causing" a metric to be low/high
+- The data has at least 2 levels of hierarchy (e.g., site → category)
+- One level shows the outlier, the next level explains it
+
+### Structure
+
+A drill-down widget contains 2–3 charts stacked vertically in one `show_widget` call,
+separated by a thin divider line (`border-top: 1px solid #E5E7EB`). Each chart has its
+own title and subtitle, telling one chapter of the story.
+
+**Layer 1 — The Overview (Where's the problem?)**
+- Broadest grouping (e.g., by site, by equipment type)
+- Grey-first: only the outlier(s) get accent color
+- Headline names the outlier and its score
+- Sorted by score ascending so the problem is at the top (after reversal for horizontal bars)
+
+**Layer 2 — The Breakdown (What's causing it?)**
+- Drill into the highlighted outlier(s) from Layer 1
+- Show the next level of detail (e.g., fault categories within the problem equipment type)
+- Same grey-first rule: only categories below threshold get accent color
+- Headline summarizes how many sub-categories are problematic
+- Include supplementary context (rule counts, change values) as secondary labels
+
+**Layer 3 (optional) — The Detail**
+- Individual equipment or specific rules, only if the user asks to go deeper
+- Usually a table is better than a third chart at this level
+
+### Headline progression
+
+Each chart's action title should advance the narrative:
+
+1. "PAC units at **75.6%** and AHUs at **89.5%** are pulling Chirnside Park below the portfolio"
+2. "Drilling into PAC & AHU: **5 fault categories** below 90%"
+
+The reader should be able to read just the headlines and understand the full story.
+
+### Visual continuity rules
+
+- Use the **same accent color** (orange for problems) across all layers — the color IS
+  the thread connecting the story
+- Use the **same grey** (`#D1D5DB`) for all non-highlighted bars across all layers
+- Keep chart widths consistent (same `max-width` wrapper)
+- Right-side padding should be consistent across charts for aligned direct labels
+- Divider between charts: `border-top: 1px solid #E5E7EB; margin: 24px 0 16px 0`
+
+---
+
+## 7. Direct Label Design — Two-Line Pattern
+
+For horizontal bar charts with rich data, use a **two-line direct label** positioned
+to the right of each bar:
+
+**Line 1 (primary):** The score value — bold if highlighted, normal if grey
+**Line 2 (secondary):** Supporting context — change in pp, rule count, or other metadata
+
+```
+// Positioning
+ctx.fillText(val + '%', bar.x + 6, bar.y - 6);     // Line 1: slightly above center
+ctx.fillText('+2.1 pp · 14 rules', bar.x + 6, bar.y + 7);  // Line 2: slightly below
+```
+
+### Styling rules
+
+| Element | Highlighted row | Grey row |
+|---|---|---|
+| Line 1 font | `700 11px` | `400 11px` |
+| Line 1 color | Accent (`#D97706`) | `#9CA3AF` |
+| Line 2 font | `400 10px` | `400 10px` |
+| Line 2 color | Accent (slightly darker for declining) | `#D1D5DB` |
+
+The secondary line should be **visually quieter** than the primary — it's there for
+readers who want detail, not for the first scan. On grey rows, the secondary label
+should be very faint (`#D1D5DB`) so it doesn't compete with highlighted rows.
+
+Ensure `layout.padding.right` is large enough (typically 80–100px) to prevent
+labels from being clipped.
+
+---
+
+## 8. Focus Attention with Preattentive Attributes
 
 Use these sparingly to direct the eye:
 
@@ -150,7 +275,7 @@ Use these sparingly to direct the eye:
 
 ---
 
-## 7. Annotations and Storytelling Text
+## 9. Annotations and Storytelling Text
 
 Every chart MUST have:
 - A **descriptive title** (top-left, dark grey, largest text on the chart)
@@ -165,7 +290,7 @@ Add these WHEN there is a clear insight:
 
 ---
 
-## 8. Visual Hierarchy
+## 10. Visual Hierarchy
 
 Establish a clear reading order through size, color, and position:
 
@@ -178,7 +303,7 @@ Establish a clear reading order through size, color, and position:
 
 ---
 
-## 9. Implementation
+## 11. Implementation
 
 All charts are rendered via the **Visualizer tool** (`show_widget`). Before your first chart,
 call `read_me` with the appropriate module (`chart`, `interactive`, or `diagram`).
@@ -197,7 +322,7 @@ file (`references/bar-charts.md`, `references/line-charts.md`, or `references/sp
 
 ---
 
-## 10. Post-Render Checklist
+## 12. Post-Render Checklist
 
 After rendering every chart, verify these SWD essentials before presenting:
 
@@ -210,7 +335,7 @@ After rendering every chart, verify these SWD essentials before presenting:
 
 ---
 
-## 11. Edge Cases
+## 13. Edge Cases
 
 - **Insufficient or ambiguous data**: Ask the user to clarify before charting. Do not guess or fabricate data points.
 - **Too many categories**: See §3 Managing Many Categories — never plot more than ~10-12 in a single chart.

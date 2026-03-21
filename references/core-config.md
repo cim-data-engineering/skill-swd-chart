@@ -36,9 +36,11 @@ ORANGE_LIGHT   = '#FCD34D'   // Secondary orange (lighter warning)
 GREY_SERIES    = ['#6B7280', '#9CA3AF', '#D1D5DB']  // Competitor/context series
 ```
 
-### When to use which color
-- **One data series, no special story:** Use ACCENT_BLUE for all bars/lines
-- **One series, highlight subset:** ACCENT_BLUE for highlighted bars, BASE_LIGHT for the rest
+### When to use which color (grey-first)
+- **Default state:** Use BASE_LIGHT (`#D1D5DB`) for all bars — grey is the starting point. Color is earned, not default.
+- **Highlight the story:** ACCENT color only on the bars/lines that ARE the story, BASE_LIGHT for everything else
+- **Problem / concern:** ACCENT_ORANGE for bars the audience should worry about (below threshold, declining)
+- **Standout / positive:** ACCENT_BLUE only when good performance IS the story (recovery, top performer)
 - **Positive vs negative:** ACCENT_BLUE for positive values, ACCENT_ORANGE for negative
 - **Primary vs context:** ACCENT_BLUE for "our data," GREY_SERIES for competitors/benchmarks
 - **Never use more than 3 distinct colors** in a single chart (excluding grey)
@@ -251,6 +253,10 @@ These are violations of SWD principles. Never do these:
 | Excessive data labels | Creates clutter | Label only the points that matter |
 | Center-aligned title | Doesn't create clean alignment lines | Left-align all text |
 | Stretching chart to fill space | Wastes white space that could add clarity | Size chart appropriately to content |
+| Rainbow status bars (red/amber/green/blue) | Multiple colors = no story, just a status dashboard | Grey-first + single accent on the outlier |
+| "Excellent" in a standout color | Highlighting good performance when the story is about problems dilutes focus | Make good = grey, bad = accent. Color follows the narrative, not a fixed scale. |
+| Coloring every threshold band | Turns the chart into a heatmap — the audience sees "categories" not "a story" | Pick ONE threshold that matters. Below it = accent. Above it = grey. |
+| Flat single-chart for hierarchical data | Loses the "why" — shows what's broken but not the cause | Use the progressive drill-down pattern (SKILL.md §6) |
 
 ---
 
