@@ -58,6 +58,26 @@ infer the possible stories it could tell. Then present options to the user for c
 >
 > Which story do you want to tell, or would you like a different angle?
 
+### Direct Visualize Mode — skip the question
+
+If the user's invocation begins with **`visualise`** or **`visualize`** (e.g.
+`/swd-chart visualise this data`, `/swd-chart visualize team performance`), **skip
+steps 2–4**. Do not present story options and do not wait for confirmation. Instead:
+
+1. Analyse the data as normal (step 1).
+2. **Pick the single strongest story yourself** — the most obvious headline the data
+   supports (largest gap, clearest trend, biggest outlier, dominant concentration).
+3. **Pick the best-practice chart type** for that story using §2 and the decision tree
+   in `references/core-config.md` §4. Default to a horizontal bar chart unless the data
+   genuinely demands otherwise.
+4. **Render immediately** with full SWD treatment (grey-first color, direct labels,
+   declutter, action title naming the story).
+5. After rendering, briefly state in 1–2 sentences which story you chose and why, and
+   offer to re-render with a different angle if the user wants one.
+
+This mode trusts you to make the call. Only fall back to asking if the data is genuinely
+ambiguous or insufficient (see §13 Edge Cases).
+
 ---
 
 ## 2. Choose the Right Chart
